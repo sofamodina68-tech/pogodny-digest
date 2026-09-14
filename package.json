@@ -1,0 +1,9 @@
+{
+  "name": "pogodny-digest",
+  "version": "1.0.0",
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "start": "node src/index.js"
+  }
+}
