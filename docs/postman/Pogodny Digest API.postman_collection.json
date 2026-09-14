@@ -1,0 +1,215 @@
+{
+  "info": {
+    "_postman_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    "name": "Pogodny Digest API",
+    "description": "Коллекция запросов к Open-Meteo, используемых в утилите «Погодный дайджест».\n\nПеременные:\n- baseUrl — https://geocoding-api.open-meteo.com/v1/search\n- forecastBaseUrl — https://api.open-meteo.com/v1/forecast\n- city — город для геокодинга\n- lat, lon — координаты (заполняются вручную или через тест-скрипт)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://geocoding-api.open-meteo.com/v1/search"
+    },
+    {
+      "key": "forecastBaseUrl",
+      "value": "https://api.open-meteo.com/v1/forecast"
+    },
+    {
+      "key": "city",
+      "value": "Москва"
+    },
+    {
+      "key": "lat",
+      "value": "55.7522"
+    },
+    {
+      "key": "lon",
+      "value": "37.6156"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Geocoding — город найден",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Статус 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Есть результаты', function () {",
+              "  const json = pm.response.json();",
+              "  pm.expect(json.results).to.be.an('array').that.is.not.empty;",
+              "  const first = json.results[0];",
+              "  pm.collectionVariables.set('lat', first.latitude);",
+              "  pm.collectionVariables.set('lon', first.longitude);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}?name={{city}}&count=1&language=ru&format=json",
+          "host": ["{{baseUrl}}"],
+          "query": [
+            { "key": "name", "value": "{{city}}" },
+            { "key": "count", "value": "1" },
+            { "key": "language", "value": "ru" },
+            { "key": "format", "value": "json" }
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "Успех (200)",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}?name={{city}}&count=1&language=ru&format=json"
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            { "key": "Content-Type", "value": "application/json; charset=utf-8" }
+          ],
+          "body": "{\n  \"results\": [\n    {\n      \"id\": 524901,\n      \"name\": \"Москва\",\n      \"latitude\": 55.7522,\n      \"longitude\": 37.6156,\n      \"country\": \"Россия\",\n      \"country_code\": \"RU\",\n      \"timezone\": \"Europe/Moscow\"\n    }\n  ]\n}"
+        }
+      ]
+    },
+    {
+      "name": "2. Geocoding — город не найден",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Статус 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Нет результатов', function () {",
+              "  const json = pm.response.json();",
+              "  pm.expect(json.results).to.be.undefined;",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}?name=НесуществующийГород12345&count=1&language=ru&format=json",
+          "host": ["{{baseUrl}}"],
+          "query": [
+            { "key": "name", "value": "НесуществующийГород12345" },
+            { "key": "count", "value": "1" },
+            { "key": "language", "value": "ru" },
+            { "key": "format", "value": "json" }
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "Город не найден (200, пустой ответ)",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}?name=НесуществующийГород12345&count=1&language=ru&format=json"
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            { "key": "Content-Type", "value": "application/json; charset=utf-8" }
+          ],
+          "body": "{}"
+        }
+      ]
+    },
+    {
+      "name": "3. Forecast — успех",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{forecastBaseUrl}}?latitude={{lat}}&longitude={{lon}}&daily=temperature_2m_max,temperature_2m_min,precipitation_sum&forecast_days=3&timezone=auto",
+          "host": ["{{forecastBaseUrl}}"],
+          "query": [
+            { "key": "latitude", "value": "{{lat}}" },
+            { "key": "longitude", "value": "{{lon}}" },
+            { "key": "daily", "value": "temperature_2m_max,temperature_2m_min,precipitation_sum" },
+            { "key": "forecast_days", "value": "3" },
+            { "key": "timezone", "value": "auto" }
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "Успех (200)",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{forecastBaseUrl}}?latitude={{lat}}&longitude={{lon}}&daily=temperature_2m_max,temperature_2m_min,precipitation_sum&forecast_days=3&timezone=auto"
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            { "key": "Content-Type", "value": "application/json; charset=utf-8" }
+          ],
+          "body": "{\n  \"latitude\": 55.75,\n  \"longitude\": 37.625,\n  \"timezone\": \"Europe/Moscow\",\n  \"daily\": {\n    \"time\": [\"2026-09-14\", \"2026-09-15\", \"2026-09-16\"],\n    \"temperature_2m_max\": [15.4, 14.9, 13.5],\n    \"temperature_2m_min\": [8.2, 7.1, 6.8],\n    \"precipitation_sum\": [0.0, 1.2, 0.0]\n  }\n}"
+        }
+      ]
+    },
+    {
+      "name": "4. Forecast — ошибка (некорректные параметры)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{forecastBaseUrl}}?latitude=abc&longitude=xyz&daily=temperature_2m_max",
+          "host": ["{{forecastBaseUrl}}"],
+          "query": [
+            { "key": "latitude", "value": "abc" },
+            { "key": "longitude", "value": "xyz" },
+            { "key": "daily", "value": "temperature_2m_max" }
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "Ошибка 400 Bad Request",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{forecastBaseUrl}}?latitude=abc&longitude=xyz&daily=temperature_2m_max"
+            }
+          },
+          "status": "Bad Request",
+          "code": 400,
+          "_postman_previewlanguage": "json",
+          "header": [
+            { "key": "Content-Type", "value": "application/json; charset=utf-8" }
+          ],
+          "body": "{\n  \"error\": true,\n  \"reason\": \"Latitude must be in range of -90 to 90°. Given: abc.\"\n}"
+        }
+      ]
+    }
+  ]
+}
